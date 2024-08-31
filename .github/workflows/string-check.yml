@@ -11,6 +11,11 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v3
+      with:
+        fetch-depth: 0 # Fetch the full history to ensure main branch is available
+
+    - name: Fetch main branch
+      run: git fetch origin main:main # Fetch the main branch specifically
 
     - name: Scan PR for Sensitive Strings
       run: |
@@ -18,7 +23,7 @@ jobs:
         patterns=("password" "apikey" "secret" "token" "PRIVATE_KEY" "SECRET_KEY")
 
         # Fetch the changes introduced in the PR
-        git diff origin/main...HEAD > changes.txt
+        git diff main...HEAD > changes.txt
 
         # Check each pattern in the changes
         for pattern in "${patterns[@]}"; do
