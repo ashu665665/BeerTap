@@ -1,0 +1,31 @@
+name: Secret String Detection
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+
+jobs:
+  check-secrets:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Scan PR for Sensitive Strings
+      run: |
+        # Define the patterns to search for, e.g., "password", "apikey", "secret", etc.
+        patterns=("password" "apikey" "secret" "token" "PRIVATE_KEY" "SECRET_KEY")
+
+        # Fetch the changes introduced in the PR
+        git diff origin/main...HEAD > changes.txt
+
+        # Check each pattern in the changes
+        for pattern in "${patterns[@]}"; do
+          if grep -i "$pattern" changes.txt; then
+            echo "Error: Detected sensitive string: $pattern"
+            exit 1
+          fi
+        done
+
+        echo "No sensitive strings detected."
